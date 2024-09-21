@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>MotiBloc de Notas</title>
+
+    <!-- Materialize CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        margin: 0;
+      }
+
+      main {
+        flex: 1 0 auto;
+      }
+
+      /* Colores personalizados */
+      header,
+      footer {
+        background-color: #3f51b5; /* color indigo */
+      }
+
+      footer {
+        bottom: 0;
+        width: 100%;
+        position: fixed;
+      }
+
+      header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+      }
+
+      .container-content {
+        padding-top: 80px; /* para evitar que el contenido quede bajo el header */
+        padding-bottom: 60px; /* para evitar que el contenido quede bajo el footer */
+      }
+
+      .note {
+        background-color: #f0f0f0;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+
+      /* Ajustes del logo */
+      .brand-logo img {
+        height: 50px; /* Ajusta el tamaño del logo */
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header fijo con logo -->
+    <header>
+      <nav>
+        <div class="nav-wrapper indigo">
+          <!-- Aquí se coloca el logo -->
+          <a href="#" class="brand-logo left">
+            <img src="logomoticasas.png" alt="Logo" />
+            <!-- URL de ejemplo para el logo -->
+            Bloc de Notas
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Contenido principal -->
+    <main>
+      <div class="container container-content">
+        <h3>Mi Bloc de Notas</h3>
+
+        <!-- Input para nueva nota -->
+        <div class="input-field">
+          <textarea id="note-content" class="materialize-textarea"></textarea>
+          <label for="note-content">Escribe una nueva nota...</label>
+        </div>
+        <button id="add-note" class="btn indigo">Agregar Nota</button>
+
+        <!-- Sección donde se mostrarán las notas -->
+        <div id="notes-list" class="section">
+          <!-- Las notas se mostrarán aquí -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer fijo -->
+    <footer class="page-footer indigo">
+      <div class="container">
+        <div class="row">
+          <div class="col s12 center">
+            <p class="white-text">© 2024 Origins Motivations</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+      // Cargar las notas de LocalStorage al cargar la página
+      document.addEventListener("DOMContentLoaded", function () {
+        loadNotes();
+      });
+
+      // Función para agregar una nueva nota
+      document
+        .getElementById("add-note")
+        .addEventListener("click", function () {
+          const noteContent = document.getElementById("note-content").value;
+
+          if (noteContent.trim() !== "") {
+            const notes = getNotesFromLocalStorage();
+            notes.push(noteContent); // Agrega la nueva nota al array
+
+            // Guardar las notas en LocalStorage
+            saveNotesToLocalStorage(notes);
+
+            // Mostrar la nueva nota en el DOM
+            displayNote(noteContent);
+
+            // Limpiar el área de texto
+            document.getElementById("note-content").value = "";
+            M.textareaAutoResize(document.getElementById("note-content"));
+          }
+        });
+
+      // Función para cargar y mostrar las notas de LocalStorage
+      function loadNotes() {
+        const notes = getNotesFromLocalStorage();
+
+        // Mostrar cada nota
+        notes.forEach((noteContent) => {
+          displayNote(noteContent);
+        });
+      }
+
+      // Función para mostrar una nota en el DOM
+      function displayNote(noteContent) {
+        const note = document.createElement("div");
+        note.classList.add("note", "card-panel");
+
+        // Crear el contenido de la nota
+        const noteText = document.createElement("p");
+        noteText.innerText = noteContent;
+
+        // Crear el botón para eliminar la nota
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Eliminar";
+        deleteBtn.classList.add("btn-small", "red", "right");
+        deleteBtn.addEventListener("click", function () {
+          this.parentElement.remove();
+          removeNoteFromLocalStorage(noteContent);
+        });
+
+        // Agregar texto y botón a la nota
+        note.appendChild(noteText);
+        note.appendChild(deleteBtn);
+
+        // Agregar la nota al contenedor de notas
+        document.getElementById("notes-list").appendChild(note);
+      }
+
+      // Función para obtener las notas desde LocalStorage
+      function getNotesFromLocalStorage() {
+        const notes = localStorage.getItem("notes");
+        return notes ? JSON.parse(notes) : []; // Devuelve un array vacío si no hay notas
+      }
+
+      // Función para guardar las notas en LocalStorage
+      function saveNotesToLocalStorage(notes) {
+        localStorage.setItem("notes", JSON.stringify(notes));
+      }
+
+      // Función para eliminar una nota de LocalStorage
+      function removeNoteFromLocalStorage(noteContent) {
+        let notes = getNotesFromLocalStorage();
+        notes = notes.filter((note) => note !== noteContent); // Eliminar la nota
+        saveNotesToLocalStorage(notes); // Guardar el array actualizado
+      }
+    </script>
+  </body>
+</html>
